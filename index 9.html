@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CrewPay</title>
+<link rel="manifest" href="manifest.json">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="CrewPay">
+<meta name="theme-color" content="#d4622a">
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{--cream:#fdf6ee;--brown:#3b2314;--espresso:#1e0f07;--tan:#c8a882;--accent:#d4622a;--card:#fff9f2;--border:#e8d9c8}
+body{background:var(--cream);font-family:'DM Sans',sans-serif;color:var(--brown);min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:40px 16px 60px}
+header{text-align:center;margin-bottom:36px}
+.icon{font-size:2.4rem;margin-bottom:8px;display:block}
+h1{font-family:'DM Serif Display',serif;font-size:2.2rem;color:var(--espresso);line-height:1.1}
+.subtitle{margin-top:8px;font-size:.95rem;color:var(--tan);font-weight:500}
+.notice{margin-top:14px;background:#fff3cd;border:2px solid #f0c040;border-radius:12px;padding:14px 16px;font-size:.95rem;font-weight:600;color:#6b4a08;line-height:1.6;max-width:380px;text-align:left}
+.notice-title{font-size:1rem;font-weight:800;display:block;margin-bottom:6px;text-align:center}
+.card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:28px 24px;width:100%;max-width:420px;margin-bottom:20px}
+.card-label{font-size:.75rem;font-weight:600;text-transform:uppercase;letter-spacing:.1em;color:var(--tan);margin-bottom:16px}
+.amounts{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:12px}
+.amt-btn{background:none;border:1.5px solid var(--border);border-radius:10px;padding:14px 8px;font-family:'DM Serif Display',serif;font-size:1.3rem;color:var(--brown);cursor:pointer;transition:all .15s}
+.amt-btn:hover{border-color:var(--accent);color:var(--accent)}
+.amt-btn.selected{background:var(--accent);border-color:var(--accent);color:white}
+.custom-row{display:flex;align-items:center;gap:10px;margin-top:4px}
+.custom-input{flex:1;border:1.5px solid var(--border);border-radius:10px;padding:12px 14px;font-family:'DM Sans',sans-serif;font-size:1rem;color:var(--brown);background:none;outline:none;transition:border-color .15s}
+.custom-input:focus{border-color:var(--accent)}
+.custom-input::placeholder{color:var(--tan)}
+.split-info{background:#fef3eb;border:1px solid #f5d9c0;border-radius:10px;padding:14px 16px;font-size:.9rem;display:flex;justify-content:space-between;align-items:center}
+.per-person{font-family:'DM Serif Display',serif;font-size:1.4rem;color:var(--accent)}
+.split-hidden{display:none}
+.tip-all-btn{display:block;width:100%;max-width:420px;background:var(--accent);color:white;border:none;border-radius:14px;padding:18px;font-family:'DM Serif Display',serif;font-size:1.25rem;cursor:pointer;text-align:center;margin-bottom:10px;transition:background .15s,transform .1s}
+.tip-all-btn:hover{background:#bf551f;transform:translateY(-1px)}
+.tip-all-btn:disabled{background:var(--border);color:var(--tan);cursor:not-allowed;transform:none}
+.or-divider{text-align:center;font-size:.8rem;color:var(--tan);margin:4px 0 16px;font-weight:500}
+.workers{display:flex;flex-direction:column;gap:10px}
+.worker-card{border:1.5px solid var(--border);border-radius:14px;padding:14px 16px;background:var(--card)}
+.worker-card-header{display:flex;align-items:center;gap:14px;margin-bottom:12px}
+.avatar{width:42px;height:42px;border-radius:50%;background:var(--border);display:flex;align-items:center;justify-content:center;font-family:'DM Serif Display',serif;font-size:1.1rem;color:var(--espresso);flex-shrink:0}
+.worker-name{font-weight:700;font-size:1rem}
+.pay-btns{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
+.pay-btn{display:flex;align-items:center;justify-content:center;gap:5px;border:none;border-radius:8px;padding:12px 6px;font-family:'DM Sans',sans-serif;font-size:.9rem;font-weight:700;cursor:pointer;transition:opacity .15s,transform .1s}
+.pay-btn:hover{opacity:.85;transform:translateY(-1px)}
+.venmo-btn{background:#008cff;color:white}
+.cash-btn{background:#00d64f;color:white}
+.zelle-card{background:#f3ecff;border:2px solid #6d1ed4;border-radius:16px;padding:22px 24px;width:100%;max-width:420px;margin-bottom:20px}
+.z-title{font-family:'DM Serif Display',serif;font-size:1.2rem;color:#3a0a7a;margin-bottom:4px}
+.z-sub{font-size:.85rem;color:#6d1ed4;margin-bottom:16px;font-weight:600}
+.z-steps{font-size:.88rem;color:#3a0a7a;line-height:1.8;margin-bottom:16px}
+.zelle-table{width:100%;border-collapse:collapse;font-size:.95rem;border-radius:8px;overflow:hidden}
+.zelle-table th{background:#6d1ed4;color:white;padding:8px 12px;text-align:left;font-weight:700}
+.zelle-table td{background:white;color:var(--brown);padding:8px 12px;border-bottom:1px solid #e0d0f8}
+.zelle-table tr:last-child td{border-bottom:none}
+.copy-btn{background:#6d1ed4;color:white;border:none;border-radius:6px;padding:6px 12px;font-size:.8rem;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif;transition:background .15s}
+.copy-btn:hover{background:#5a18b0}
+.copy-btn.copied{background:#6dba7f}
+footer{margin-top:32px;font-size:.78rem;color:var(--tan);text-align:center}
+.overlay{display:none;position:fixed;inset:0;background:rgba(30,15,7,.6);backdrop-filter:blur(4px);z-index:100;align-items:center;justify-content:center;padding:24px}
+.overlay.active{display:flex}
+.stepper-card{background:var(--card);border-radius:20px;padding:32px 28px;width:100%;max-width:380px;text-align:center;box-shadow:0 20px 60px rgba(30,15,7,.25)}
+.step-dots{display:flex;justify-content:center;gap:8px;margin-bottom:28px}
+.dot{width:10px;height:10px;border-radius:50%;background:var(--border);transition:background .2s}
+.dot.done{background:#6dba7f}
+.dot.active{background:var(--accent)}
+.step-label{font-size:.75rem;font-weight:600;text-transform:uppercase;letter-spacing:.1em;color:var(--tan);margin-bottom:6px}
+.step-name{font-family:'DM Serif Display',serif;font-size:1.9rem;color:var(--espresso);margin-bottom:4px}
+.step-amount{font-size:1rem;color:var(--tan);margin-bottom:20px}
+.step-pay-btns{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:14px}
+.step-pay-btn{display:flex;align-items:center;justify-content:center;gap:6px;border:none;border-radius:10px;padding:16px 6px;font-family:'DM Sans',sans-serif;font-size:1rem;font-weight:700;cursor:pointer;transition:opacity .15s}
+.step-pay-btn:hover{opacity:.85}
+.step-zelle{background:#f3ecff;border:1px solid #6d1ed4;border-radius:10px;padding:12px 14px;margin-bottom:12px;font-size:.88rem;color:#3a0a7a;text-align:left;line-height:1.6}
+.step-zelle strong{color:#6d1ed4}
+.step-zelle .z-copy{background:#6d1ed4;color:white;border:none;border-radius:5px;padding:4px 10px;font-size:.78rem;font-weight:700;cursor:pointer;margin-left:8px;font-family:'DM Sans',sans-serif}
+.step-zelle .z-copy.copied{background:#6dba7f}
+.s-venmo-btn{background:#008cff;color:white}
+.s-cash-btn{background:#00d64f;color:white}
+.step-skip-btn{background:none;border:none;color:var(--tan);font-size:.88rem;cursor:pointer;padding:6px;text-decoration:underline;font-family:inherit}
+.confirm-overlay{display:none;position:fixed;inset:0;background:rgba(30,15,7,.65);backdrop-filter:blur(4px);z-index:400;align-items:center;justify-content:center;padding:24px}
+.confirm-overlay.active{display:flex}
+.confirm-popup{background:var(--card);border-radius:20px;padding:30px 26px;width:100%;max-width:360px;text-align:center;box-shadow:0 20px 60px rgba(30,15,7,.25)}
+.confirm-popup .cp-icon{font-size:2.4rem;display:block;margin-bottom:10px}
+.confirm-popup h3{font-family:'DM Serif Display',serif;font-size:1.5rem;color:var(--espresso);margin-bottom:10px}
+.confirm-popup p{font-size:.95rem;color:var(--brown);line-height:1.6;margin-bottom:22px}
+.confirm-popup p strong{color:var(--accent)}
+.confirm-go-btn{width:100%;border:none;border-radius:12px;padding:15px;font-family:'DM Serif Display',serif;font-size:1.15rem;cursor:pointer;margin-bottom:10px;color:white;transition:opacity .15s}
+.confirm-go-btn:hover{opacity:.85}
+.confirm-cancel{background:none;border:none;color:var(--tan);font-size:.88rem;cursor:pointer;text-decoration:underline;font-family:inherit}
+.step-done-msg{display:none;flex-direction:column;align-items:center;gap:12px}
+.checkmark{font-size:3rem}
+.step-done-close{margin-top:8px;background:var(--espresso);color:white;border:none;border-radius:12px;padding:14px 32px;font-family:'DM Serif Display',serif;font-size:1.1rem;cursor:pointer}
+.welcome-overlay{display:flex;position:fixed;inset:0;background:rgba(30,15,7,.65);backdrop-filter:blur(5px);z-index:200;align-items:center;justify-content:center;padding:24px}
+.welcome-popup{background:var(--card);border-radius:22px;padding:34px 28px;width:100%;max-width:380px;text-align:center;box-shadow:0 24px 60px rgba(30,15,7,.3)}
+.w-icon{font-size:2.8rem;display:block;margin-bottom:12px}
+.welcome-popup h2{font-family:'DM Serif Display',serif;font-size:1.7rem;color:var(--espresso);margin-bottom:16px}
+.w-body{font-size:.95rem;color:var(--brown);line-height:1.7;text-align:left;margin-bottom:20px}
+.w-step{display:flex;gap:12px;align-items:flex-start;margin-bottom:12px}
+.w-num{background:var(--accent);color:white;border-radius:50%;width:26px;height:26px;font-size:.82rem;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px}
+.w-note{background:#fef3eb;border:1px solid #f5d9c0;border-radius:10px;padding:12px 14px;font-size:.88rem;color:#7a4a10;line-height:1.5;margin-bottom:22px;text-align:left}
+.welcome-confirm{width:100%;background:var(--accent);color:white;border:none;border-radius:12px;padding:16px;font-family:'DM Serif Display',serif;font-size:1.2rem;cursor:pointer}
+</style>
+</head>
+<body>
+
+<div class="welcome-overlay" id="welcomeOverlay">
+  <div class="welcome-popup">
+    <span class="w-icon">&#9749;</span>
+    <h2>Show Your Baristas' Some Love</h2>
+    <div class="w-note">Each barista receives their own separate payment. This is because payment apps do not allow sending to multiple people at once. Your generosity goes directly to each person — nothing is pooled or held.<br><br><strong>Venmo regular?</strong> Once you have paid everyone once, their names are saved in your Venmo. Next time open Venmo, tap <strong>Pay or Request</strong>, add each barista, then tap <strong>Split</strong> to divide the amount evenly in one transaction!</div>
+    <button class="welcome-confirm" onclick="document.getElementById('welcomeOverlay').style.display='none'">Got it - let's show some love!</button>
+  </div>
+</div>
+
+<div id="appContent"></div>
+
+<div class="overlay" id="overlay">
+  <div class="stepper-card">
+    <div class="step-dots" id="stepDots"></div>
+    <div id="stepperMain">
+      <div class="step-label" id="stepLabel"></div>
+      <div class="step-name" id="stepName"></div>
+      <div class="step-amount" id="stepAmount"></div>
+      <div class="step-pay-btns">
+        <button class="step-pay-btn s-venmo-btn" onclick="doOpen('venmo')">V&nbsp;Venmo</button>
+        <button class="step-pay-btn s-cash-btn" onclick="doOpen('cashapp')">$&nbsp;Cash App</button>
+      </div>
+      <div class="step-zelle" id="stepZelle"></div>
+      <button class="step-skip-btn" onclick="nextStep()">Skip this person</button>
+    </div>
+    <div class="step-done-msg" id="stepDone">
+      <span class="checkmark">&#127881;</span>
+      <p>All done! Thanks for supporting the crew.</p>
+      <button class="step-done-close" onclick="document.getElementById('overlay').classList.remove('active')">Close</button>
+    </div>
+  </div>
+</div>
+
+
+
+<script>
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('service-worker.js');
+}
+
+var sel = null, step = 0, config = null, activeMembers = [];
+
+function el(tag, props, children) {
+  var e = document.createElement(tag);
+  if (props) Object.keys(props).forEach(function(k){
+    if (k === 'style') e.style.cssText = props[k];
+    else if (k === 'html') e.innerHTML = props[k];
+    else if (k === 'text') e.textContent = props[k];
+    else if (k === 'onclick') e.onclick = props[k];
+    else if (k === 'oninput') e.oninput = props[k];
+    else e.setAttribute(k, props[k]);
+  });
+  if (children) children.forEach(function(c){ if(c) e.appendChild(c); });
+  return e;
+}
+
+async function loadApp() {
+  var saved = localStorage.getItem('crewpay_config');
+  var content = document.getElementById('appContent');
+  content.innerHTML = '';
+  if (!saved) {
+    document.getElementById('welcomeOverlay').style.display = 'none';
+    content.appendChild(el('div', {style:'text-align:center;padding:40px 20px'}, [
+      el('p', {style:'font-size:2rem;margin-bottom:8px', html:'&#9749;'}),
+      el('p', {style:"font-size:1.4rem;color:var(--espresso);margin-bottom:8px;font-family:'DM Serif Display',serif", text:'Welcome to CrewPay'}),
+      el('p', {style:'margin-bottom:20px;color:var(--tan)', text:'Set up your crew to get started.'}),
+      el('a', {href:'setup.html', style:'color:var(--accent);font-weight:700', text:'Set Up My Crew'})
+    ]));
+    return;
+  }
+  config = JSON.parse(saved);
+  var now = new Date(), day = now.getDay(), hour = now.getHours(), min = now.getMinutes();
+  var nowMins = hour * 60 + min;
+  activeMembers = config.members.filter(function(m) {
+    if (m.days.indexOf(day) < 0) return false;
+    if (m.startTime) {
+      var sp = m.startTime.split(':');
+      var startMins = parseInt(sp[0]) * 60 + parseInt(sp[1]);
+      if (nowMins < startMins) return false;
+    }
+    if (m.endTime) {
+      var ep = m.endTime.split(':');
+      var endMins = parseInt(ep[0]) * 60 + parseInt(ep[1]);
+      if (nowMins >= endMins) return false;
+    }
+    return true;
+  });
+  if (activeMembers.length === 0) {
+    document.getElementById('welcomeOverlay').style.display = 'none';
+    content.appendChild(el('div', {style:'text-align:center;padding:40px 20px'}, [
+      el('p', {style:'font-size:2rem;margin-bottom:8px', html:'&#128564;'}),
+      el('p', {style:"font-size:1.3rem;color:var(--espresso);margin-bottom:8px;font-family:'DM Serif Display',serif", text:'No one is on shift right now.'}),
+      el('p', {style:'color:var(--tan)', text:'Check back later!'})
+    ]));
+    return;
+  }
+  buildPage(content);
+}
+
+function buildPage(content) {
+  var bizName = config.biz_name || 'CrewPay';
+
+  // Header
+  var header = el('header', null, [
+    el('span', {style:'font-size:2.4rem;margin-bottom:8px;display:block', html:'&#9749;'}),
+    el('h1', {text:'Support the Crew'}),
+    el('p', {style:'margin-top:8px;font-size:.95rem;color:var(--tan);font-weight:500', text:bizName + ' - your barista team appreciates you!'}),
+    el('div', {style:'margin-top:14px;background:#fff3cd;border:2px solid #f0c040;border-radius:12px;padding:14px 16px;font-size:.95rem;font-weight:600;color:#6b4a08;line-height:1.6;max-width:380px;text-align:left',
+      html:'<span style="font-size:1rem;font-weight:800;display:block;margin-bottom:6px;text-align:center">&#128161; How this works</span>1. Choose an amount below.<br>2. Tap the button showing the split amount and total to begin.<br>3. Venmo or Cash App will open once per barista &mdash; tap Pay each time, then come back here for the next person.<br><br>Prefer <strong>Zelle?</strong> Scroll down for phone numbers and instructions.'})
+  ]);
+  content.appendChild(header);
+
+  // Amount card
+  var amounts = el('div', {style:'display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:12px'});
+  [1,2,3,5,10,20].forEach(function(v){
+    var b = el('button', {class:'amt-btn', text:'$'+v});
+    (function(val){ b.onclick = function(){ selectAmount(val); }; })(v);
+    amounts.appendChild(b);
+  });
+  var customInp = el('input', {class:'custom-input', type:'number', placeholder:'Custom amount', min:'1'});
+  customInp.oninput = function(){ onCustomInput(this.value); };
+  content.appendChild(el('div', {class:'card'}, [
+    el('div', {class:'card-label', text:'Choose an amount'}),
+    amounts,
+    el('div', {style:'display:flex;align-items:center;gap:10px;margin-top:4px'}, [customInp])
+  ]));
+
+  // Split card
+  var splitCard = el('div', {class:'card split-hidden', id:'splitCard'});
+  splitCard.innerHTML = '<div class="split-info"><div><div style="font-weight:600" id="splitLabel">Split ways</div><div style="font-size:.82rem;color:var(--tan);margin-top:2px" id="splitNames"></div></div><div class="per-person" id="perPersonAmt"></div></div>';
+  content.appendChild(splitCard);
+
+  // Tip all button
+  var tipBtn = el('button', {class:'tip-all-btn', id:'tipAllBtn', text:'Support Everyone', disabled:'true'});
+  tipBtn.onclick = tipAll;
+  content.appendChild(tipBtn);
+  content.appendChild(el('div', {style:'text-align:center;font-size:.8rem;color:var(--tan);margin:4px 0 16px;font-weight:500', text:'or support individually below'}));
+
+  // Crew cards
+  var workerList = el('div', {class:'workers', id:'workerList'});
+  var stepDots = document.getElementById('stepDots');
+  stepDots.innerHTML = '';
+  activeMembers.forEach(function(m, i) {
+    var init = m.name.slice(0,2).toUpperCase();
+    var payBtns = el('div', {class:'pay-btns'});
+    if (m.venmo) {
+      var vb = el('button', {class:'pay-btn venmo-btn', text:'V Venmo'});
+      (function(h){ vb.onclick = function(){ goVenmo(h, null); }; })(m.venmo);
+      payBtns.appendChild(vb);
+    }
+    if (m.cashapp) {
+      var cb = el('button', {class:'pay-btn cash-btn', text:'$ Cash App'});
+      (function(t){ cb.onclick = function(){ goCash(t); }; })(m.cashapp);
+      payBtns.appendChild(cb);
+    }
+    workerList.appendChild(el('div', {class:'worker-card'}, [
+      el('div', {class:'worker-card-header'}, [
+        el('div', {class:'avatar', text:init}),
+        el('div', {class:'worker-name', text:m.name})
+      ]),
+      payBtns
+    ]));
+    var dot = el('div', {class:'dot', id:'d'+i});
+    stepDots.appendChild(dot);
+  });
+  content.appendChild(el('div', {class:'card'}, [
+    el('div', {class:'card-label', text:'The crew'}),
+    workerList
+  ]));
+
+  // Zelle section
+  var zelleMembers = activeMembers.filter(function(m){ return m.zelle; });
+  if (zelleMembers.length > 0) {
+    var tbody = el('tbody');
+    zelleMembers.forEach(function(m) {
+      var copyBtn = el('button', {class:'copy-btn', text:'Copy'});
+      (function(ph){ copyBtn.onclick = function(){ copyPhone(ph, this); }; })(m.zelle);
+      tbody.appendChild(el('tr', null, [
+        el('td', {style:'padding:8px 12px;font-weight:700', text:m.name}),
+        el('td', {style:'padding:8px 12px', text:m.zelle}),
+        el('td', {style:'padding:8px 12px'}, [copyBtn])
+      ]));
+    });
+    var table = el('table', {class:'zelle-table'});
+    table.appendChild(el('thead', null, [
+      el('tr', null, [
+        el('th', {text:'Name'}), el('th', {text:'Phone Number'}), el('th', {text:''})
+      ])
+    ]));
+    table.appendChild(tbody);
+    content.appendChild(el('div', {class:'zelle-card'}, [
+      el('div', {class:'z-title', html:'&#128155; Paying with Zelle?'}),
+      el('div', {class:'z-sub', text:'Open your banking app or the Zelle app and follow these steps:'}),
+      el('div', {class:'z-steps', html:'1. Open your bank app or Zelle app<br>2. Tap <strong>Send Money</strong><br>3. Search the phone number below<br>4. Enter the amount and tap <strong>Send</strong>'}),
+      table
+    ]));
+  }
+
+  content.appendChild(el('div', {style:'margin-top:24px;font-size:.8rem;color:var(--tan);text-align:center',
+    html:'<a href="javascript:void(0)" onclick="adminLogin()" style="color:var(--tan);text-decoration:underline;font-size:.75rem">&#9881; Admin</a>'}));
+  content.appendChild(el('footer', {text:'Tap Venmo or Cash App to open the app on your phone'}));
+}
+
+function selectAmount(v) {
+  sel = v;
+  document.querySelectorAll('.amt-btn').forEach(function(b){ b.classList.remove('selected'); });
+  var idx = [1,2,3,5,10,20].indexOf(v);
+  if (idx >= 0) document.querySelectorAll('.amt-btn')[idx].classList.add('selected');
+  var ci = document.getElementById('customAmt') || document.querySelector('.custom-input');
+  if (ci) ci.value = '';
+  updateSplit();
+}
+function onCustomInput(v) {
+  document.querySelectorAll('.amt-btn').forEach(function(b){ b.classList.remove('selected'); });
+  sel = parseFloat(v) || null;
+  updateSplit();
+}
+function updateSplit() {
+  var card = document.getElementById('splitCard');
+  var btn = document.getElementById('tipAllBtn');
+  if (!card || !btn) return;
+  if (sel && sel > 0) {
+    var per = (sel / activeMembers.length).toFixed(2);
+    document.getElementById('perPersonAmt').textContent = '$' + per + ' each';
+    document.getElementById('splitLabel').textContent = 'Split ' + activeMembers.length + ' ways';
+    document.getElementById('splitNames').textContent = activeMembers.map(function(m){ return m.name; }).join(' - ');
+    card.classList.remove('split-hidden');
+    btn.disabled = false;
+    btn.textContent = '$' + per + ' each  |  $' + parseFloat(sel).toFixed(2) + ' total';
+  } else {
+    card.classList.add('split-hidden');
+    btn.disabled = true;
+    btn.textContent = 'Support Everyone';
+  }
+}
+function goVenmo(handle, amt) {
+  var amount = (amt !== null && amt !== undefined) ? parseFloat(amt).toFixed(2) : (sel ? sel.toFixed(2) : '');
+  var note = encodeURIComponent('Thanks!');
+  var app = 'venmo://paycharge?txn=pay&recipients=' + handle + (amount ? '&amount=' + amount : '') + '&note=' + note;
+  var web = 'https://venmo.com/' + handle + (amount ? '?txn=pay&amount=' + amount + '&note=' + note : '');
+  window.location = app;
+  setTimeout(function(){ window.open(web, '_blank'); }, 700);
+}
+function goCash(tag) {
+  var amt = sel ? sel.toFixed(2) : '';
+  var app = 'cashapp://cash.app/$' + tag + (amt ? '?amount=' + amt : '');
+  var web = 'https://cash.app/$' + tag + (amt ? '?amount=' + amt : '');
+  window.location = app;
+  setTimeout(function(){ window.open(web, '_blank'); }, 700);
+}
+function tipAll() {
+  if (!sel) return;
+  step = 0;
+  document.getElementById('stepperMain').style.display = 'block';
+  document.getElementById('stepDone').style.display = 'none';
+  showStep();
+  document.getElementById('overlay').classList.add('active');
+}
+function showStep() {
+  var per = (sel / activeMembers.length).toFixed(2);
+  var m = activeMembers[step];
+  for (var i = 0; i < activeMembers.length; i++) {
+    var d = document.getElementById('d' + i);
+    d.className = 'dot';
+    if (i < step) d.classList.add('done');
+    else if (i === step) d.classList.add('active');
+  }
+  document.getElementById('stepLabel').textContent = 'Step ' + (step+1) + ' of ' + activeMembers.length;
+  document.getElementById('stepName').textContent = m.name;
+  document.getElementById('stepAmount').textContent = '$' + per + ' each - choose how to pay ' + m.name + ':';
+  var zBox = document.getElementById('stepZelle');
+  zBox.innerHTML = '';
+  if (m.zelle) {
+    zBox.appendChild(el('span', {html:'<strong>&#128155; Zelle:</strong> Open your bank app, tap Send Money, search <strong>' + m.zelle + '</strong> and send <strong>$' + per + '</strong> '}));
+    var czBtn = el('button', {class:'z-copy', text:'Copy'});
+    (function(ph){ czBtn.onclick = function(){ copyStepZelle(ph, this); }; })(m.zelle);
+    zBox.appendChild(czBtn);
+    zBox.style.display = 'block';
+  } else {
+    zBox.style.display = 'none';
+  }
+}
+function doOpen(method) {
+  var per = (sel / activeMembers.length).toFixed(2);
+  var m = activeMembers[step];
+  if (method === 'venmo') goVenmo(m.venmo, per);
+  if (method === 'cashapp') goCash(m.cashapp);
+  nextStep();
+}
+function nextStep() {
+  step++;
+  if (step >= activeMembers.length) {
+    for (var i = 0; i < activeMembers.length; i++) document.getElementById('d'+i).className = 'dot done';
+    document.getElementById('stepperMain').style.display = 'none';
+    document.getElementById('stepDone').style.display = 'flex';
+  } else { showStep(); }
+}
+function copyPhone(phone, btn) {
+  navigator.clipboard.writeText(phone).then(function(){
+    btn.textContent = 'Copied!';
+    btn.classList.add('copied');
+    setTimeout(function(){ btn.textContent = 'Copy'; btn.classList.remove('copied'); }, 2000);
+  });
+}
+function copyStepZelle(phone, btn) {
+  navigator.clipboard.writeText(phone).then(function(){
+    btn.textContent = 'Copied!';
+    btn.classList.add('copied');
+    setTimeout(function(){ nextStep(); }, 1000);
+  });
+}
+
+loadApp();
+</script>
+</body>
+</html>
