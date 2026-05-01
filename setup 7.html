@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CrewPay - Setup</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#d4622a">
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{--cream:#fdf6ee;--brown:#3b2314;--espresso:#1e0f07;--tan:#c8a882;--accent:#d4622a;--card:#fff9f2;--border:#e8d9c8;--green:#6dba7f}
+body{background:var(--cream);font-family:'DM Sans',sans-serif;color:var(--brown);min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:40px 16px 60px}
+header{text-align:center;margin-bottom:32px}
+.logo{font-size:2.6rem;display:block;margin-bottom:8px}
+h1{font-family:'DM Serif Display',serif;font-size:2rem;color:var(--espresso)}
+.tagline{color:var(--tan);font-size:.9rem;margin-top:6px;font-weight:500}
+.card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:24px;width:100%;max-width:440px;margin-bottom:20px}
+.card-label{font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--tan);margin-bottom:14px}
+.field{margin-bottom:14px}
+.field label{display:block;font-size:.85rem;font-weight:600;margin-bottom:5px;color:var(--brown)}
+.field input{width:100%;border:1.5px solid var(--border);border-radius:9px;padding:11px 13px;font-family:'DM Sans',sans-serif;font-size:.95rem;color:var(--brown);background:none;outline:none;transition:border-color .15s}
+.field input:focus{border-color:var(--accent)}
+.field input::placeholder{color:var(--tan)}
+.crew-member{background:var(--cream);border:1.5px solid var(--border);border-radius:12px;padding:16px;margin-bottom:12px;position:relative}
+.crew-member .member-name{font-family:'DM Serif Display',serif;font-size:1.1rem;color:var(--espresso);margin-bottom:10px}
+.remove-btn{position:absolute;top:12px;right:12px;background:none;border:none;color:var(--tan);font-size:1.1rem;cursor:pointer;padding:2px 6px;border-radius:4px}
+.remove-btn:hover{color:#c0392b}
+.schedule-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+.day-btn{background:none;border:1.5px solid var(--border);border-radius:6px;padding:6px 10px;font-size:.78rem;font-weight:600;cursor:pointer;color:var(--tan);transition:all .15s;font-family:'DM Sans',sans-serif}
+.day-btn.active{background:var(--accent);border-color:var(--accent);color:white}
+.end-time-row{display:flex;align-items:center;gap:8px;margin-top:10px;font-size:.85rem;color:var(--brown)}
+.end-time-row input[type=time]{border:1.5px solid var(--border);border-radius:7px;padding:6px 10px;font-family:'DM Sans',sans-serif;font-size:.85rem;color:var(--brown);background:none;outline:none}
+.end-time-row input[type=time]:focus{border-color:var(--accent)}
+.add-member-btn{width:100%;background:none;border:2px dashed var(--border);border-radius:12px;padding:14px;font-family:'DM Sans',sans-serif;font-size:.95rem;font-weight:600;color:var(--tan);cursor:pointer;transition:all .15s;margin-bottom:4px}
+.add-member-btn:hover{border-color:var(--accent);color:var(--accent)}
+.save-btn{display:block;width:100%;max-width:440px;background:var(--accent);color:white;border:none;border-radius:14px;padding:17px;font-family:'DM Serif Display',serif;font-size:1.2rem;cursor:pointer;text-align:center;transition:background .15s,transform .1s;margin-bottom:12px}
+.save-btn:hover{background:#bf551f;transform:translateY(-1px)}
+.preview-btn{display:block;width:100%;max-width:440px;background:var(--espresso);color:white;border:none;border-radius:14px;padding:17px;font-family:'DM Serif Display',serif;font-size:1.2rem;cursor:pointer;text-align:center;transition:background .15s}
+.preview-btn:hover{background:#2d1a0e}
+.toast{display:none;position:fixed;bottom:30px;left:50%;transform:translateX(-50%);background:var(--green);color:white;padding:12px 24px;border-radius:10px;font-weight:600;font-size:.95rem;z-index:999}
+.toast.show{display:block}
+</style>
+</head>
+<body>
+
+<header>
+  <span class="logo">&#9749;</span>
+  <h1>CrewPay</h1>
+  <p class="tagline">Set up your crew tip page in minutes</p>
+</header>
+
+<div class="card">
+  <div class="card-label">Your Business</div>
+  <div class="field">
+    <label>Business Name</label>
+    <input type="text" id="bizName" placeholder="e.g. Aristocrat Cafe">
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-label">Your Crew</div>
+  <div id="crewList"></div>
+  <button class="add-member-btn" onclick="addMember()">+ Add Crew Member</button>
+</div>
+
+<button class="save-btn" onclick="saveAndPreview()">Save &amp; Preview Tip Page</button>
+<button class="preview-btn" onclick="window.location='index.html'">Open Tip Page</button>
+
+<div class="toast" id="toast">Saved!</div>
+
+<script>
+var members = [];
+
+function addMember(data) {
+  var id = Date.now();
+  var m = data || {id:id, name:'', venmo:'', cashapp:'', zelle:'', days:[0,1,2,3,4,5,6], endTime:''};
+  if (!data) members.push(m);
+  renderCrew();
+}
+
+function renderCrew() {
+  var list = document.getElementById('crewList');
+  list.innerHTML = '';
+  var days = ['Su','Mo','Tu','We','Th','Fr','Sa'];
+  members.forEach(function(m, idx) {
+    var div = document.createElement('div');
+    div.className = 'crew-member';
+    var rmBtn = document.createElement('button');
+    rmBtn.className = 'remove-btn';
+    rmBtn.innerHTML = '&#x2715;';
+    (function(i){ rmBtn.onclick = function(){ removeMember(i); }; })(idx);
+    div.appendChild(rmBtn);
+    var fieldDefs = [
+      {label:'Name',key:'name',type:'text',ph:'e.g. John Doe',val:m.name},
+      {label:'Venmo Username',key:'venmo',type:'text',ph:'e.g. JohnDoe',val:m.venmo},
+      {label:'Cash App $Cashtag',key:'cashapp',type:'text',ph:'e.g. JohnDoe',val:m.cashapp},
+      {label:'Zelle Phone Number',key:'zelle',type:'tel',ph:'e.g. 7201234567',val:m.zelle}
+    ];
+    fieldDefs.forEach(function(fd) {
+      var fw = document.createElement('div'); fw.className = 'field';
+      var lbl = document.createElement('label'); lbl.textContent = fd.label;
+      var inp = document.createElement('input');
+      inp.type = fd.type; inp.placeholder = fd.ph; inp.value = fd.val || '';
+      (function(i,k){ inp.oninput = function(){ updateMember(i,k,this.value); }; })(idx,fd.key);
+      fw.appendChild(lbl); fw.appendChild(inp); div.appendChild(fw);
+    });
+    var dlbl = document.createElement('div');
+    dlbl.className = 'card-label';
+    dlbl.style.cssText = 'margin-top:10px;margin-bottom:6px';
+    dlbl.textContent = 'Working Days';
+    div.appendChild(dlbl);
+    var drow = document.createElement('div');
+    drow.className = 'schedule-row'; drow.id = 'days-'+idx;
+    div.appendChild(drow);
+    var srow = document.createElement('div'); srow.className = 'end-time-row';
+    var slbl = document.createElement('label'); slbl.textContent = 'Shift starts at:';
+    var stinp = document.createElement('input');
+    stinp.type = 'time'; stinp.value = m.startTime || '';
+    (function(i){ stinp.oninput = function(){ updateMember(i,'startTime',this.value); }; })(idx);
+    var sspan = document.createElement('span');
+    sspan.style.cssText = 'color:var(--tan);font-size:.8rem';
+    sspan.textContent = '(optional)';
+    srow.appendChild(slbl); srow.appendChild(stinp); srow.appendChild(sspan);
+    div.appendChild(srow);
+
+    var erow = document.createElement('div'); erow.className = 'end-time-row';
+    var elbl = document.createElement('label'); elbl.textContent = 'Shift ends at:';
+    var etinp = document.createElement('input');
+    etinp.type = 'time'; etinp.value = m.endTime || '';
+    (function(i){ etinp.oninput = function(){ updateMember(i,'endTime',this.value); }; })(idx);
+    var espan = document.createElement('span');
+    espan.style.cssText = 'color:var(--tan);font-size:.8rem';
+    espan.textContent = '(optional)';
+    erow.appendChild(elbl); erow.appendChild(etinp); erow.appendChild(espan);
+    div.appendChild(erow);
+    list.appendChild(div);
+    var dayRow = document.getElementById('days-'+idx);
+    days.forEach(function(d, di) {
+      var btn = document.createElement('button');
+      btn.className = 'day-btn' + (m.days.indexOf(di) >= 0 ? ' active' : '');
+      btn.textContent = d;
+      btn.onclick = function() { toggleDay(idx, di); };
+      dayRow.appendChild(btn);
+    });
+  });
+}
+
+function updateMember(idx, key, val) {
+  members[idx][key] = val;
+}
+
+function toggleDay(idx, di) {
+  var pos = members[idx].days.indexOf(di);
+  if (pos >= 0) members[idx].days.splice(pos, 1);
+  else members[idx].days.push(di);
+  renderCrew();
+}
+
+function removeMember(idx) {
+  members.splice(idx, 1);
+  renderCrew();
+}
+
+function saveAndPreview() {
+  var biz = document.getElementById('bizName').value.trim();
+  if (!biz) { alert('Please enter a business name.'); return; }
+  if (members.length === 0) { alert('Please add at least one crew member.'); return; }
+  var config = { bizName: biz, members: members };
+  localStorage.setItem('crewpay_config', JSON.stringify(config));
+  var t = document.getElementById('toast');
+  t.classList.add('show');
+  setTimeout(function(){ t.classList.remove('show'); window.location='index.html'; }, 1200);
+}
+
+// Load saved config
+var saved = localStorage.getItem('crewpay_config');
+if (saved) {
+  var config = JSON.parse(saved);
+  document.getElementById('bizName').value = config.bizName || '';
+  members = config.members || [];
+  renderCrew();
+} else {
+  addMember();
+}
+</script>
+</body>
+</html>
